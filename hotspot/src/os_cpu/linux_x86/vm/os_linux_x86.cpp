@@ -496,6 +496,7 @@ JVM_handle_linux_signal(int sig,
     // process of write protecting the memory serialization page.
     // It write enables the page immediately after protecting it
     // so we can just return to retry the write.
+    //当线程访问到被保护的内存地址时，会触发一个SIGSEGV信号，进而触发JVM的signal handler来阻塞这个线程
     if ((sig == SIGSEGV) &&
         os::is_memory_serialize_page(thread, (address) info->si_addr)) {
       // Block current thread until the memory serialize page permission restored.

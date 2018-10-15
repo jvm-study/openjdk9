@@ -242,6 +242,14 @@
 # include "utilities/preserveException.hpp"
 # include "utilities/sizes.hpp"
 # include "utilities/utf8.hpp"
+# include <cstdlib>
+# include <cstdint>
+# include "register_x86.hpp"
+# include "assembler_x86.hpp"
+# include "globalDefinitions.hpp"
+# include "globalDefinitions_x86.hpp"
+# include "assembler_x86.hpp"
+# include <stubRoutines_x86.hpp>
 #ifdef COMPILER2
 # include "libadt/dict.hpp"
 # include "libadt/set.hpp"

@@ -1698,6 +1698,10 @@ class ReleaseForegroundGC: public StackObj {
   }
 };
 
+/**
+ * 后台收集
+ * @param cause
+ */
 void CMSCollector::collect_in_background(GCCause::Cause cause) {
   assert(Thread::current()->is_ConcurrentGC_thread(),
     "A CMS asynchronous collection is only allowed on a CMS thread.");

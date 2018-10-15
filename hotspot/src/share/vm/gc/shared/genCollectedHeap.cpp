@@ -215,6 +215,7 @@ void GenCollectedHeap::save_used_regions() {
   _young_gen->save_used_region();
 }
 
+//最大容量
 size_t GenCollectedHeap::max_capacity() const {
   return _young_gen->max_capacity() + _old_gen->max_capacity();
 }
@@ -233,7 +234,7 @@ unsigned int GenCollectedHeap::update_full_collections_completed() {
 // Update the _full_collections_completed counter, as appropriate,
 // at the end of a concurrent GC cycle. Note the conditional update
 // below to allow this method to be called by a concurrent collector
-// without synchronizing in any manner with the VM thread (which
+// without synchronizing in any manner with the VM thread (whichlang
 // may already have initiated a STW full collection "concurrently").
 unsigned int GenCollectedHeap::update_full_collections_completed(unsigned int count) {
   MonitorLockerEx ml(FullGCCount_lock, Mutex::_no_safepoint_check_flag);
@@ -403,6 +404,7 @@ void GenCollectedHeap::collect_generation(Generation* gen, bool full, size_t siz
   }
 }
 
+//垃圾收集
 void GenCollectedHeap::do_collection(bool           full,
                                      bool           clear_all_soft_refs,
                                      size_t         size,
@@ -419,6 +421,7 @@ void GenCollectedHeap::do_collection(bool           full,
          "the requesting thread should have the Heap_lock");
   guarantee(!is_gc_active(), "collection is not reentrant");
 
+  // 检查是否已经GC锁是否已经激活，并设置需要进行GC的标志为true
   if (GCLocker::check_active_before_gc()) {
     return; // GC is disabled (e.g. JNI GetXXXCritical operation)
   }

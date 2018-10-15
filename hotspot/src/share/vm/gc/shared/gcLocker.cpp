@@ -81,8 +81,9 @@ void GCLocker::log_debug_jni(const char* msg) {
     log.debug("%s Thread \"%s\" %d locked.", msg, Thread::current()->name(), _jni_lock_count);
   }
 }
-
+// 检查是否已经GC锁是否已经激活，并设置需要进行GC的标志为true
 bool GCLocker::check_active_before_gc() {
+    //安全点
   assert(SafepointSynchronize::is_at_safepoint(), "only read at safepoint");
   if (is_active() && !_needs_gc) {
     verify_critical_count();
@@ -121,7 +122,13 @@ void GCLocker::jni_lock(JavaThread* thread) {
   _jni_lock_count++;
   increment_debug_jni_lock_count();
 }
-
+/**
+ *
+ * GCLocker Initiated GC 原因
+ * openjdk的bug
+ * https://bugs.openjdk.java.net/browse/JDK-8048556
+ * @param thread
+ */
 void GCLocker::jni_unlock(JavaThread* thread) {
   assert(thread->in_last_critical(), "should be exiting critical region");
   MutexLocker mu(JNICritical_lock);

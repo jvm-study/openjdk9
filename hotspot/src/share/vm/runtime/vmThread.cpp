@@ -425,7 +425,7 @@ void VMThread::loop() {
           // Force a safepoint since we have not had one for at least
           // 'GuaranteedSafepointInterval' milliseconds.  This will run all
           // the clean-up processing that needs to be done regularly at a
-          // safepoint
+          // safepoint安全点
           SafepointSynchronize::begin();
           #ifdef ASSERT
             if (GCALotAtAllSafepoints) InterfaceSupport::check_gc_alot();

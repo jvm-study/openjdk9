@@ -479,6 +479,10 @@ JVM_ENTRY_NO_ENV(jlong, JVM_FreeMemory(void))
 JVM_END
 
 
+
+/**
+ * JVM最大内存
+ */
 JVM_ENTRY_NO_ENV(jlong, JVM_MaxMemory(void))
   JVMWrapper("JVM_MaxMemory");
   size_t n = Universe::heap()->max_capacity();
@@ -1865,6 +1869,7 @@ static jobjectArray get_class_declared_methods_helper(
   return (jobjectArray) JNIHandles::make_local(env, result());
 }
 
+//对应于java.lang.Class.getDeclaredMethods0这个native方法
 JVM_ENTRY(jobjectArray, JVM_GetClassDeclaredMethods(JNIEnv *env, jclass ofClass, jboolean publicOnly))
 {
   JVMWrapper("JVM_GetClassDeclaredMethods");

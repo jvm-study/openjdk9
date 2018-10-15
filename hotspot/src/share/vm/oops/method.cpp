@@ -1605,6 +1605,7 @@ static int method_comparator(Method* a, Method* b) {
   return a->name()->fast_compare(b->name());
 }
 
+// 方法排序
 // This is only done during class loading, so it is OK to assume method_idnum matches the methods() array
 // default_methods also uses this without the ordering for fast find_method
 void Method::sort_methods(Array<Method*>* methods, bool idempotent, bool set_idnums) {
