@@ -1070,6 +1070,9 @@ void CodeCache::initialize() {
   os::register_code_area((char*)low_bound(), (char*)high_bound());
 }
 
+/**
+ * 代码高速缓存初始化
+ */
 void codeCache_init() {
   CodeCache::initialize();
   // Load AOT libraries and add AOT code heaps.

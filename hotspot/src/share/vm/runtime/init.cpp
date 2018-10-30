@@ -86,6 +86,17 @@ void stubRoutines_init2(); // note: StubRoutines need 2-phase init
 void perfMemory_exit();
 void ostream_exit();
 
+/**
+ * 2018-10-22
+ * 全局数据结构初始化
+ * 主要包括
+ * 1.初始化Java基本类型系统
+ * 2.分配全局事件缓冲区，初始化事件队列
+ * 3.
+ *
+ *
+ *
+ */
 void vm_init_globals() {
   check_ThreadShadow();
   basic_types_init();
@@ -97,15 +108,37 @@ void vm_init_globals() {
 }
 
 
+/**
+ * 2018-10-22
+ * 初始化全局数据结构
+ *
+ * @return
+ */
 jint init_globals() {
   HandleMark hm;
+
+  /**
+   * JMX :Management模块
+   */
   management_init();
+
+
   bytecodes_init();
   classLoader_init1();
   compilationPolicy_init();
+  /**
+   *
+   * 代码高速缓存
+   */
   codeCache_init();
   VM_Version_init();
   os_init_globals();
+
+  /**
+   *
+   * 位于运行时模块 step1
+   * 分配CodeBuffer存储空间
+   */
   stubRoutines_init1();
   jint status = universe_init();  // dependent on codeCache_init and
                                   // stubRoutines_init1 and metaspace_init.
@@ -119,13 +152,27 @@ jint init_globals() {
   templateTable_init();
   InterfaceSupport_init();
   SharedRuntime::generate_stubs();
+
+
+  /**
+   *
+   * 1.根据VM配置的GC策略和算法,选择垃圾回收器和堆的种类,初始化堆,
+   *   根据VM选项UseCompressedOops进行相关配置,若VM选项UseTLAB开启TLAB,则初始化TLAB缓存区
+   * 2.对共享空间进行配置以及初始化vmSymbols和SystemDictionary等全局数据结构
+   *
+   *
+   *
+   *
+   */
   universe2_init();  // dependent on codeCache_init and stubRoutines_init1
+
+
   referenceProcessor_init();
   jni_handles_init();
 #if INCLUDE_VM_STRUCTS
   vmStructs_init();
 #endif // INCLUDE_VM_STRUCTS
-
+o
   vtableStubs_init();
   InlineCacheBuffer_init();
   compilerOracle_init();
@@ -140,6 +187,11 @@ jint init_globals() {
     return JNI_ERR;
   }
   javaClasses_init();   // must happen after vtable initialization
+
+   /**
+   *
+   * 位于运行时模块 step2
+   */
   stubRoutines_init2(); // note: StubRoutines need 2-phase init
   MethodHandles::generate_adapters();
 

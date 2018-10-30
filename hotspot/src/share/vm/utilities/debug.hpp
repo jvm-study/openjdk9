@@ -193,6 +193,8 @@ do {                                                                            
   BREAKPOINT;                                                                     \
 } while (0)
 
+
+//调试宏,当程序走到本不该走到的地方
 #define ShouldNotReachHere()                                                      \
 do {                                                                              \
   report_should_not_reach_here(__FILE__, __LINE__);                               \

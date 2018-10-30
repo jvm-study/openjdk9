@@ -31,7 +31,12 @@
 // OBJECT hierarchy
 // This hierarchy is a representation hierarchy, i.e. if A is a superclass
 // of B, A's representation is a prefix of B's representation.
-
+/**
+ * UseCompressedOops开启/关闭时的类元数据指针的定义方式
+ *
+ *
+ *
+ */
 typedef juint narrowOop; // Offset instead of address for an oop within a java object
 
 // If compressed klass pointers then use narrowKlass.
@@ -141,7 +146,11 @@ public:
   // an oop for stuff (like ObjArrayKlass.cpp)
   operator oop* () const              { return (oop *)obj(); }
 };
-
+/**
+ * 2018-10-19
+ * 【宏】,根据type传入的不同定义不同的oopDesc类型
+ *  定义<type>oopDesc类型
+ */
 #define DEF_OOP(type)                                                      \
    class type##OopDesc;                                                    \
    class type##Oop : public oop {                                          \
@@ -168,6 +177,7 @@ public:
        }                                                                   \
    };
 
+//定义<type>oopDesc类型
 DEF_OOP(instance);
 DEF_OOP(array);
 DEF_OOP(objArray);
@@ -187,17 +197,29 @@ template <class T> inline T cast_from_oop(oop o) {
 
 // The metadata hierarchy is separate from the oop hierarchy
 
+/**
+ *
+ * 2018-10-18
+ * 元空间对象
+ * class和struct的区别
+ * class默认数据访问权限 private
+ * struct默认数据访问权限 public
+ *
+ *
+ */
 //      class MetaspaceObj
 class   ConstMethod;
 class   ConstantPoolCache;
 class   MethodData;
 //      class Metadata
-class   Method;
-class   ConstantPool;
+class   Method; //方法
+class   ConstantPool; //常量池
 //      class CHeapObj
 class   CompiledICHolder;
 
-
+/**
+ * klass的体系
+ */
 // The klass hierarchy is separate from the oop hierarchy.
 
 class Klass;

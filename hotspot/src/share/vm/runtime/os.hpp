@@ -433,12 +433,12 @@ class os: AllStatic {
   // threads
 
   enum ThreadType {
-    vm_thread,
+    vm_thread,         // vm线程
     cgc_thread,        // Concurrent GC thread
     pgc_thread,        // Parallel GC thread
     java_thread,       // Java, CodeCacheSweeper, JVMTIAgent and Service threads.
-    compiler_thread,
-    watcher_thread,
+    compiler_thread,   //编译器线程
+    watcher_thread,    //watcher线程
     os_thread
   };
 

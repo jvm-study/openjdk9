@@ -20,6 +20,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  *
+ * 物理栈桢
  */
 
 #ifndef SHARE_VM_RUNTIME_FRAME_HPP
@@ -50,7 +51,9 @@ class vframeArray;
 class frame VALUE_OBJ_CLASS_SPEC {
  private:
   // Instance variables:
+  // 栈栈桢，指向栈顶元素
   intptr_t* _sp; // stack pointer (from Thread::last_Java_sp)
+  //指向下一条要执行的指令地址
   address   _pc; // program counter (the next instruction after the call)
 
   CodeBlob* _cb; // CodeBlob that "owns" pc

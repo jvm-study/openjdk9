@@ -111,6 +111,13 @@ void ClassFileParser::set_class_bad_constant_seen(short bad_constant) {
   if (_bad_constant_seen == 0) _bad_constant_seen = bad_constant;
 }
 
+/**
+ *  常量池初始化
+ * @param stream
+ * @param cp
+ * @param length
+ * @param __the_thread__
+ */
 void ClassFileParser::parse_constant_pool_entries(const ClassFileStream* const stream,
                                                   ConstantPool* cp,
                                                   const int length,

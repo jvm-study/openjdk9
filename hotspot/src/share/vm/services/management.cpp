@@ -76,6 +76,9 @@ Klass* Management::_threadInfo_klass = NULL;
 jmmOptionalSupport Management::_optional_support = {0};
 TimeStamp Management::_stamp;
 
+/**
+ * management模块初始化
+ */
 void management_init() {
 #if INCLUDE_MANAGEMENT
   Management::init();
@@ -726,6 +729,12 @@ JVM_ENTRY(jlong, jmm_SetPoolThreshold(JNIEnv* env, jobject obj, jmmThresholdType
   }
   return prev;
 JVM_END
+
+/**
+ *
+ * GetMemoryUsage底层实现
+ *
+ */
 
 // Returns a java/lang/management/MemoryUsage object representing
 // the memory usage for the heap or non-heap memory.

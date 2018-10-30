@@ -103,6 +103,11 @@ class Handle VALUE_OBJ_CLASS_SPEC {
   static oop raw_resolve(oop *handle)            { return handle == NULL ? (oop)NULL : *handle; }
 };
 
+/**
+ * 2018-10-19
+ * 定义句柄
+ * 根据不同的oop类型定义不同的句柄
+ */
 // Specific Handles for different oop types
 #define DEF_HANDLE(type, is_a)                   \
   class type##Handle: public Handle {            \
@@ -126,7 +131,7 @@ class Handle VALUE_OBJ_CLASS_SPEC {
     type##Oop    operator -> () const            { return non_null_obj(); } \
   };
 
-
+//定义<type>Handle类型局部
 DEF_HANDLE(instance         , is_instance_noinline         )
 DEF_HANDLE(array            , is_array_noinline            )
 DEF_HANDLE(objArray         , is_objArray_noinline         )

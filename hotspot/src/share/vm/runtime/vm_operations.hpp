@@ -166,8 +166,18 @@ class VM_Operation: public CHeapObj<mtInternal> {
   void set_next(VM_Operation *next)              { _next = next; }
   void set_prev(VM_Operation *prev)              { _prev = prev; }
 
-  // Configuration. Override these appropriately in subclasses.
+  // Configuration. Override these appropriately in   subclasses.
   virtual VMOp_Type type() const = 0;
+  /**
+   * 2018-10-20
+   * 可以判断具体的操作模式
+   *  1)safepoint:阻塞,进去安全点
+   *  2)no_safepoint:阻塞,非进入安全点
+   *  3)concurrent:非阻塞,非进入安全点
+   *  4)async_safepoint:非阻塞,进去安全点
+   *
+   * @return
+   */
   virtual Mode evaluation_mode() const            { return _safepoint; }
   virtual bool allow_nested_vm_operations() const { return false; }
   virtual bool is_cheap_allocated() const         { return false; }

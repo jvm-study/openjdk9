@@ -203,6 +203,11 @@ HeapWord* CollectedHeap::allocate_from_tlab(KlassHandle klass, Thread* thread, s
   return allocate_from_tlab_slow(klass, thread, size);
 }
 
+/**
+ * 初始化对象
+ * @param obj
+ * @param size
+ */
 void CollectedHeap::init_obj(HeapWord* obj, size_t size) {
   assert(obj != NULL, "cannot initialize NULL object");
   const size_t hs = oopDesc::header_size();

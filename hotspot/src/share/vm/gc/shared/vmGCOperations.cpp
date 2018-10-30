@@ -115,7 +115,7 @@ void VM_GC_Operation::doit_epilogue() {
   assert(Thread::current()->is_Java_thread(), "just checking");
   //判断Pending集合是否为空
   if (Universe::has_reference_pending_list()) {
-    Heap_lock->notify_all();
+    Heap_lock->notify_aswitchll();
   }
   Heap_lock->unlock();
 }

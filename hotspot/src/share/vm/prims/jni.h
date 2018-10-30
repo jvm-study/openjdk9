@@ -1515,6 +1515,7 @@ struct JNIEnv_ {
         return functions->CallStaticDoubleMethodA(this,clazz,methodID,args);
     }
 
+    //调用静态方法
     void CallStaticVoidMethod(jclass cls, jmethodID methodID, ...) {
         va_list args;
         va_start(args,methodID);
@@ -1946,6 +1947,7 @@ _JNI_IMPORT_OR_EXPORT_ jint JNICALL
 JNI_GetDefaultJavaVMInitArgs(void *args);
 
 _JNI_IMPORT_OR_EXPORT_ jint JNICALL
+//创建Java虚拟机
 JNI_CreateJavaVM(JavaVM **pvm, void **penv, void *args);
 
 _JNI_IMPORT_OR_EXPORT_ jint JNICALL

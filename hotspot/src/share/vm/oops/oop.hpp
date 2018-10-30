@@ -59,7 +59,18 @@ class oopDesc {
   friend class VMStructs;
   friend class JVMCIVMStructs;
  private:
+  /**
+   * 存储对象的运行时记录信息
+   * 如哈希码(HashCode),GC分代年龄,锁状态标志，线程持有的锁,偏向线程ID
+   */
   volatile markOop _mark;
+  //对象的元数据信息
+    /**
+     * 元数据指针
+     * 于其中的_klass是存在于union类型的_metadata中的,
+     * 我们知道union类型的分配是按成员最大的那个进行分配的,
+     * 然后对这块内存的解释取决于代码中使用的是其中哪个字段
+     */
   union _metadata {
     Klass*      _klass;
     narrowKlass _compressed_klass;

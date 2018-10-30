@@ -20,6 +20,8 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  *
+ * 内联函数
+ *
  */
 
 #ifndef SHARE_VM_OOPS_OOP_INLINE_HPP
@@ -92,14 +94,29 @@ void oopDesc::release_set_mark(markOop m) {
   OrderAccess::release_store_ptr(&_mark, m);
 }
 
+/**
+ * 2018-10-19
+ * 对象头内联函数 原子操作设置mark word
+ * @param new_mark
+ * @param old_mark
+ * @return
+ */
 markOop oopDesc::cas_set_mark(markOop new_mark, markOop old_mark) {
   return (markOop) Atomic::cmpxchg_ptr(new_mark, &_mark, old_mark);
 }
 
+/**
+ * 初始化mark word
+ */
 void oopDesc::init_mark() {
   set_mark(markOopDesc::prototype_for_object(this));
 }
 
+/**
+ * 获取对象对应的类型klass
+ * 是否使用了压缩指针
+ * @return
+ */
 Klass* oopDesc::klass() const {
   if (UseCompressedClassPointers) {
     return Klass::decode_klass_not_null(_metadata._compressed_klass);
@@ -289,7 +306,15 @@ int oopDesc::size_given_klass(Klass* klass)  {
   return s;
 }
 
+/**
+ * 是否是类实例
+ * @return
+ */
 bool oopDesc::is_instance()  const { return klass()->is_instance_klass();  }
+/**
+ * 是否是数组
+ * @return
+ */
 bool oopDesc::is_array()     const { return klass()->is_array_klass();     }
 bool oopDesc::is_objArray()  const { return klass()->is_objArray_klass();  }
 bool oopDesc::is_typeArray() const { return klass()->is_typeArray_klass(); }

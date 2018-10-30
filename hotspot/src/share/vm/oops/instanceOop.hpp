@@ -29,6 +29,13 @@
 
 // An instanceOop is an instance of a Java Class
 // Evaluating "new HashTable()" will create an instanceOop.
+/**
+ * 每创建一个对象,在java内部就会创建一个对应类型的oop对象,各种oop类的共同基类为oopDesc
+ *
+ * 在jvm内部,一个Java对象在内存中的布局可以连续分成两部分,instanceOopDesc和实例数据,instanceOopDesc和arrayOopDesc又称为对象头
+ *
+ *
+ */
 
 class instanceOopDesc : public oopDesc {
  public:

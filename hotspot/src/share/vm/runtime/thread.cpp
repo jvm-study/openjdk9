@@ -3350,6 +3350,7 @@ bool        Threads::_vm_complete = false;
 void Threads::threads_do(ThreadClosure* tc) {
   assert_locked_or_safepoint(Threads_lock);
   // ALL_JAVA_THREADS iterates through all JavaThreads
+  //迭代线程列表
   ALL_JAVA_THREADS(p) {
     tc->do_thread(p);
   }
@@ -3436,7 +3437,11 @@ static void call_initPhase3(TRAPS) {
   JavaCalls::call_static(&result, klass, vmSymbols::initPhase3_name(),
                                          vmSymbols::void_method_signature(), CHECK);
 }
-
+/**
+ * 初始化java类
+ * @param main_thread
+ * @param __the_thread__
+ */
 void Threads::initialize_java_lang_classes(JavaThread* main_thread, TRAPS) {
   TraceTime timer("Initialize java.lang classes", TRACETIME_LOG(Info, startuptime));
 
@@ -3458,6 +3463,7 @@ void Threads::initialize_java_lang_classes(JavaThread* main_thread, TRAPS) {
   Universe::set_main_thread_group(thread_group());
   initialize_class(vmSymbols::java_lang_Thread(), CHECK);
   oop thread_object = create_initial_thread(thread_group, main_thread, CHECK);
+  /** 主线程*/
   main_thread->set_threadObj(thread_object);
   // Set thread status to running since main thread has
   // been started and running.
@@ -3603,14 +3609,24 @@ jint Threads::create_vm(JavaVMInitArgs* args, bool* canTryAgain) {
   }
 #endif // INCLUDE_JVMCI
 
+/**
+ *
+ * 创建 main thread
+ */
   // Attach the main thread to this os thread
+  /**创建JavaThread类型的线程变量(刚建好的状态为_thread_new)*/
   JavaThread* main_thread = new JavaThread();
+  /**设置线程状态*/
   main_thread->set_thread_state(_thread_in_vm);
+  /**初始化当前线程*/
   main_thread->initialize_thread_current();
   // must do this before set_active_handles
+  /** 记录线程栈的基址和大小*/
   main_thread->record_stack_base_and_size();
+  /** 线程设置JNI句柄*/
   main_thread->set_active_handles(JNIHandleBlock::allocate_block());
 
+  /**通过OS模块创建原始线程 */
   if (!main_thread->set_as_starting_thread()) {
     vm_shutdown_during_initialization(
                                       "Failed necessary internal allocation. Out of swap space");
@@ -3619,8 +3635,9 @@ jint Threads::create_vm(JavaVMInitArgs* args, bool* canTryAgain) {
     return JNI_ENOMEM;
   }
 
-  // Enable guard page *after* os::create_main_thread(), otherwise it would
+  // TODO  Enable guard page *after* os::create_main_thread(), otherwise it would
   // crash Linux VM, see notes in os_linux.cpp.
+  /** 初始化主线程栈*/
   main_thread->create_stack_guard_pages();
 
   // Initialize Java-Level synchronization subsystem
@@ -3651,6 +3668,7 @@ jint Threads::create_vm(JavaVMInitArgs* args, bool* canTryAgain) {
   // real raw monitor. VM is setup enough here for raw monitor enter.
   JvmtiExport::transition_pending_onload_raw_monitors();
 
+  /** 创建VMThread */
   // Create the VMThread
   { TraceTime timer("Start VMThread", TRACETIME_LOG(Info, startuptime));
 
