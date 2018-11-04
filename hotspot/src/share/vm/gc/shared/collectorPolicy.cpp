@@ -89,6 +89,7 @@ void CollectorPolicy::initialize_flags() {
       vm_exit_during_initialization("Initial heap size set to a larger value than the maximum heap size");
     }
     if (_min_heap_byte_size != 0 && MaxHeapSize < _min_heap_byte_size) {
+    if (_min_heap_byte_size != 0 && MaxHeapSize < _min_heap_byte_size) {
       vm_exit_during_initialization("Incompatible minimum and maximum heap sizes specified");
     }
   }
@@ -574,6 +575,14 @@ void GenCollectorPolicy::initialize_size_info() {
   DEBUG_ONLY(GenCollectorPolicy::assert_size_info();)
 }
 
+
+/**
+ *
+ *
+ *
+ *
+ *
+ */
 HeapWord* GenCollectorPolicy::mem_allocate_work(size_t size,
                                         bool is_tlab,
                                         bool* gc_overhead_limit_was_exceeded) {
@@ -594,22 +603,33 @@ HeapWord* GenCollectorPolicy::mem_allocate_work(size_t size,
     HandleMark hm; // Discard any handles allocated in each iteration.
 
     // First allocation attempt is lock-free.
+
+    //第一次尝试分配不需要获取锁，通过while+CAS来进行分配
     Generation *young = gch->young_gen();
+
+
     assert(young->supports_inline_contig_alloc(),
       "Otherwise, must do alloc within heap lock");
+    //对大小进行判断，比如是否超过eden区能分配的最大大小
     if (young->should_allocate(size, is_tlab)) {
+      //while循环+指针碰撞+CAS分配
       result = young->par_allocate(size, is_tlab);
       if (result != NULL) {
         assert(gch->is_in_reserved(result), "result not in heap");
         return result;
       }
     }
+
+    //如果res=null,表示在eden区分配失败了，因为没有连续的空间。则继续往下走
     uint gc_count_before;  // Read inside the Heap_lock locked region.
     {
+      //锁
       MutexLocker ml(Heap_lock);
       log_trace(gc, alloc)("GenCollectorPolicy::mem_allocate_work: attempting locked slow path allocation");
       // Note that only large objects get a shot at being
       // allocated in later generations.
+
+      //需要注意的是，只有大对象可以被分配在老年代。一般情况下都是false,所以first_only=true
       bool first_only = ! should_try_older_generation_allocation(size);
 
       result = gch->attempt_allocation(size, is_tlab, first_only);
@@ -617,11 +637,15 @@ HeapWord* GenCollectorPolicy::mem_allocate_work(size_t size,
         assert(gch->is_in_reserved(result), "result not in heap");
         return result;
       }
-
+      /*Gc操作已被触发但还无法被执行,一般不会出现这种情况，只有在jni中jni_GetStringCritical等
+        方法被调用时出现is_active_and_needs_gc=TRUE，主要是为了避免GC导致对象地址改变。
+        jni_GetStringCritical方法的作用参考文章：http://blog.csdn.net/xyang81/article/details/42066665
+        */
       if (GCLocker::is_active_and_needs_gc()) {
         if (is_tlab) {
           return NULL;  // Caller will retry allocating individual object.
         }
+        ///因为不能进行GC回收，所以只能尝试通过扩堆
         if (!gch->is_maximal_no_gc()) {
           // Try and expand heap to satisfy request.
           result = expand_heap_and_allocate(size, is_tlab);
@@ -661,8 +685,11 @@ HeapWord* GenCollectorPolicy::mem_allocate_work(size_t size,
       gc_count_before = gch->total_collections();
     }
 
+    //TODO YGC的入口
+    ///VM操作进行一次由分配失败触发的GC
     VM_GenCollectForAllocation op(size, is_tlab, gc_count_before);
     VMThread::execute(&op);
+    ////一次GC操作已完成
     if (op.prologue_succeeded()) {
       result = op.result();
       if (op.gc_locked()) {
@@ -670,6 +697,10 @@ HeapWord* GenCollectorPolicy::mem_allocate_work(size_t size,
          continue;  // Retry and/or stall as necessary.
       }
 
+
+      /**
+        分配失败且已经完成GC了，则判断是否超时等信息。
+       */
       // Allocation has failed and a collection
       // has been done.  If the gc time limit was exceeded the
       // this time, return NULL so that an out-of-memory
@@ -719,6 +750,12 @@ HeapWord* GenCollectorPolicy::expand_heap_and_allocate(size_t size,
   return result;
 }
 
+
+/**
+ * 2018-11-01
+ *  YGC
+ *
+ */
 HeapWord* GenCollectorPolicy::satisfy_failed_allocation(size_t size,
                                                         bool   is_tlab) {
   GenCollectedHeap *gch = GenCollectedHeap::heap();
@@ -726,6 +763,7 @@ HeapWord* GenCollectorPolicy::satisfy_failed_allocation(size_t size,
   HeapWord* result = NULL;
 
   assert(size != 0, "Precondition violated");
+  //表示有jni在操作内存,此时不能进行GC，避免改变对象在内存的位置
   if (GCLocker::is_active_and_needs_gc()) {
     // GC locker is active; instead of a collection we will attempt
     // to expand the heap, if there's room for expansion.
@@ -733,6 +771,9 @@ HeapWord* GenCollectorPolicy::satisfy_failed_allocation(size_t size,
       result = expand_heap_and_allocate(size, is_tlab);
     }
     return result;   // Could be null if we are out of space.
+
+    //consult_young=true的时候，表示调用该方法时，判断此时晋升是否的安全的。
+    //若=false，表示只取上次young gc时设置的参数，此次不再进行额外的判断。
   } else if (!gch->incremental_collection_will_fail(false /* don't consult_young */)) {
     // Do an incremental collection.
     gch->do_collection(false,                     // full

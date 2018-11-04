@@ -1114,10 +1114,16 @@ bool ConcurrentMarkSweepGeneration::should_collect(bool   full,
   // This and promotion failure handling are connected at the
   // hip and should be fixed by untying them.
 }
-
+//TODO 是否进行CMS GC
+/**
+ *
+ * 是否需要并行回收
+ * @return
+ */
 bool CMSCollector::shouldConcurrentCollect() {
   LogTarget(Trace, gc) log;
 
+  //是否有FULLGC的请求
   if (_full_gc_requested) {
     log.print("CMSCollector: collect because of explicit  gc request (or GCLocker)");
     return true;
@@ -1146,9 +1152,15 @@ bool CMSCollector::shouldConcurrentCollect() {
   }
   // ------------------------------------------------------------------
 
+  /**
+   * UseCMSInitiatingOccupancyOnly 参数
+   */
   // If the estimated time to complete a cms collection (cms_duration())
   // is less than the estimated time remaining until the cms generation
   // is full, start a collection.
+  //UseCMSInitiatingOccupancyOnly默认false
+  //UseCMSInitiatingOccupancyOnly为false,会动态计算阈值
+  //预计完成CMS回收所需要的时间小于预计的老年代填满的时间，则进行回收。
   if (!UseCMSInitiatingOccupancyOnly) {
     if (stats().valid()) {
       if (stats().time_until_cms_start() == 0.0) {
@@ -1159,6 +1171,8 @@ bool CMSCollector::shouldConcurrentCollect() {
       // to try and "bootstrap" our CMS/promotion statistics;
       // this branch will not fire after the first successful CMS
       // collection because the stats should then be valid.
+      //_bootstrap_occupancy默认50%
+      //老年代占用率超过50%
       if (_cmsGen->occupancy() >= _bootstrap_occupancy) {
         log.print(" CMSCollector: collect for bootstrapping statistics: occupancy = %f, boot occupancy = %f",
                   _cmsGen->occupancy(), _bootstrap_occupancy);
@@ -1172,6 +1186,8 @@ bool CMSCollector::shouldConcurrentCollect() {
   // an appropriate criterion for making this decision.
   // XXX We need to make sure that the gen expansion
   // criterion dovetails well with this. XXX NEED TO FIX THIS
+
+  //是否需要GC
   if (_cmsGen->should_concurrent_collect()) {
     log.print("CMS old gen initiated");
     return true;
@@ -1181,13 +1197,18 @@ bool CMSCollector::shouldConcurrentCollect() {
   // this is not likely to be productive in practice because it's probably too
   // late anyway.
   GenCollectedHeap* gch = GenCollectedHeap::heap();
+
+
   assert(gch->collector_policy()->is_generation_policy(),
          "You may want to check the correctness of the following");
+
+  //判断年轻代存活对象晋升失败
   if (gch->incremental_collection_will_fail(true /* consult_young */)) {
     log.print("CMSCollector: collect because incremental collection will fail ");
     return true;
   }
 
+  //元空间是否需要GC
   if (MetaspaceGC::should_concurrent_collect()) {
     log.print("CMSCollector: collect for metadata allocation ");
     return true;
@@ -1233,11 +1254,11 @@ void CMSCollector::clear_expansion_cause() {
 // collections.
 // We want to start a new collection cycle if any of the following
 // conditions hold:
-// . our current occupancy exceeds the configured initiating occupancy
+// . 1.our current occupancy exceeds the configured initiating occupancy
 //   for this generation, or
-// . we recently needed to expand this space and have not, since that
+// . 2.we recently needed to expand this space and have not, since that
 //   expansion, done a collection of this generation, or
-// . the underlying space believes that it may be a good idea to initiate
+// . 3.the underlying space believes that it may be a good idea to initiate
 //   a concurrent collection (this may be based on criteria such as the
 //   following: the space uses linear allocation and linear allocation is
 //   going to fail, or there is believed to be excessive fragmentation in
@@ -1249,20 +1270,34 @@ void CMSCollector::clear_expansion_cause() {
 bool ConcurrentMarkSweepGeneration::should_concurrent_collect() const {
 
   assert_lock_strong(freelistLock());
+
+  //内存使用率大于初始化参数
+  /**
+   * initiating_occupancy()===>ConcurrentMarkSweepGeneration::init_initiating_occupancy
+   */
   if (occupancy() > initiating_occupancy()) {
     log_trace(gc)(" %s: collect because of occupancy %f / %f  ",
                   short_name(), occupancy(), initiating_occupancy());
     return true;
   }
+
   if (UseCMSInitiatingOccupancyOnly) {
     return false;
   }
+  /**
+   * 在进行堆扩容
+   */
   if (expansion_cause() == CMSExpansionCause::_satisfy_allocation) {
     log_trace(gc)(" %s: collect because expanded for allocation ", short_name());
     return true;
   }
   return false;
 }
+
+
+
+
+
 
 void ConcurrentMarkSweepGeneration::collect(bool   full,
                                             bool   clear_all_soft_refs,
@@ -1712,6 +1747,7 @@ void CMSCollector::collect_in_background(GCCause::Cause cause) {
     MutexLockerEx hl(Heap_lock, safepoint_check);
     FreelistLocker fll(this);
     MutexLockerEx x(CGC_lock, safepoint_check);
+
     if (_foregroundGCIsActive) {
       // The foreground collector is. Skip this
       // background collection.
@@ -1727,15 +1763,18 @@ void CMSCollector::collect_in_background(GCCause::Cause cause) {
 
       // Clear the MetaspaceGC flag since a concurrent collection
       // is starting but also clear it after the collection.
+
       MetaspaceGC::set_should_concurrent_collect(false);
     }
     // Decide if we want to enable class unloading as part of the
     // ensuing concurrent GC cycle.
+
     update_should_unload_classes();
     _full_gc_requested = false;           // acks all outstanding full gc requests
     _full_gc_cause = GCCause::_no_gc;
     // Signal that we are about to start a collection
     gch->increment_total_full_collections();  // ... starting a collection cycle
+
     _collection_count_start = gch->total_full_collections();
   }
 
@@ -1800,6 +1839,9 @@ void CMSCollector::collect_in_background(GCCause::Cause cause) {
       "should be waiting");
 
     switch (_collectorState) {
+      /**
+       * 初始化标记
+       */
       case InitialMarking:
         {
           ReleaseForegroundGC x(this);

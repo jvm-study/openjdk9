@@ -455,6 +455,11 @@ public:
   bool incremental_collection_will_fail(bool consult_young) {
     // The first disjunct remembers if an incremental collection failed, even
     // when we thought (second disjunct) that it would not.
+
+    /**
+     * incremental_collection_failed()之前是否晋升失败，默认为false
+     * collection_attempt_is_safe()本次晋升是否失败
+     */
     return incremental_collection_failed() ||
            (consult_young && !_young_gen->collection_attempt_is_safe());
   }

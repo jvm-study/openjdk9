@@ -155,8 +155,17 @@ size_t Generation::max_contiguous_available() const {
   return MAX2(avail, old_avail);
 }
 
+//TODO 年代是否能够安全晋升
+/**
+ * 2018-11-01
+ * @param max_promotion_in_bytes
+ * @return
+ */
 bool Generation::promotion_attempt_is_safe(size_t max_promotion_in_bytes) const {
+
+  //最大可用空间
   size_t available = max_contiguous_available();
+
   bool   res = (available >= max_promotion_in_bytes);
   log_trace(gc)("Generation: promo attempt is%s safe: available(" SIZE_FORMAT ") %s max_promo(" SIZE_FORMAT ")",
                 res? "":" not", available, res? ">=":"<", max_promotion_in_bytes);

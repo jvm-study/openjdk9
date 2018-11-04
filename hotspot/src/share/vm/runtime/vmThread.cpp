@@ -635,8 +635,12 @@ void VMThread::execute(VM_Operation* op) {
     _cur_vm_operation = op;
 
     if (op->evaluate_at_safepoint() && !SafepointSynchronize::is_at_safepoint()) {
+
+      ////驱使所有线程进入safepoint然后挂起他们
       SafepointSynchronize::begin();
+      ////调用vm_operation的doit()方法进行回收
       op->evaluate();
+      ////唤醒所有的线程，在safepoint执行之后，让这些线程重新恢复执行
       SafepointSynchronize::end();
     } else {
       op->evaluate();

@@ -83,6 +83,13 @@ inline void post_allocation_notify(KlassHandle klass, oop obj, int size) {
   }
 }
 
+
+/**
+ * 初始化
+ * @param klass
+ * @param obj_ptr
+ * @param size
+ */
 void CollectedHeap::post_allocation_setup_obj(KlassHandle klass,
                                               HeapWord* obj_ptr,
                                               int size) {
@@ -125,6 +132,13 @@ void CollectedHeap::post_allocation_setup_array(KlassHandle klass,
   post_allocation_notify(klass, new_obj, new_obj->size());
 }
 
+/**
+ * 对象内存分配
+ * @param klass
+ * @param size
+ * @param __the_thread__
+ * @return
+ */
 HeapWord* CollectedHeap::common_mem_allocate_noinit(KlassHandle klass, size_t size, TRAPS) {
 
   // Clear unhandled oops for memory allocation.  Memory allocation might
@@ -137,6 +151,7 @@ HeapWord* CollectedHeap::common_mem_allocate_noinit(KlassHandle klass, size_t si
   }
 
   HeapWord* result = NULL;
+  //在TLAB中分配
   if (UseTLAB) {
     result = allocate_from_tlab(klass, THREAD, size);
     if (result != NULL) {
@@ -146,6 +161,7 @@ HeapWord* CollectedHeap::common_mem_allocate_noinit(KlassHandle klass, size_t si
     }
   }
   bool gc_overhead_limit_was_exceeded = false;
+  //在堆中分配
   result = Universe::heap()->mem_allocate(size,
                                           &gc_overhead_limit_was_exceeded);
   if (result != NULL) {
@@ -192,6 +208,13 @@ HeapWord* CollectedHeap::common_mem_allocate_init(KlassHandle klass, size_t size
   return obj;
 }
 
+/**
+ * TLAB中分配空间
+ * @param klass
+ * @param thread
+ * @param size
+ * @return
+ */
 HeapWord* CollectedHeap::allocate_from_tlab(KlassHandle klass, Thread* thread, size_t size) {
   assert(UseTLAB, "should use UseTLAB");
 
@@ -200,6 +223,7 @@ HeapWord* CollectedHeap::allocate_from_tlab(KlassHandle klass, Thread* thread, s
     return obj;
   }
   // Otherwise...
+  //TLAB分配失败后
   return allocate_from_tlab_slow(klass, thread, size);
 }
 
@@ -216,11 +240,22 @@ void CollectedHeap::init_obj(HeapWord* obj, size_t size) {
   Copy::fill_to_aligned_words(obj + hs, size - hs);
 }
 
+/**
+ * 对象分配内存
+ * @param klass
+ * @param size
+ * @param __the_thread__
+ * @return
+ */
 oop CollectedHeap::obj_allocate(KlassHandle klass, int size, TRAPS) {
   debug_only(check_for_valid_allocation_state());
+  //校验在GC的时候不分配内存
   assert(!Universe::heap()->is_gc_active(), "Allocation during gc not allowed");
+  //分配大小大于0
   assert(size >= 0, "int won't convert to size_t");
+  //内存分配
   HeapWord* obj = common_mem_allocate_init(klass, size, CHECK_NULL);
+  //初始化
   post_allocation_setup_obj(klass, obj, size);
   NOT_PRODUCT(Universe::heap()->check_for_bad_heap_word_value(obj, size));
   return (oop)obj;
@@ -228,6 +263,7 @@ oop CollectedHeap::obj_allocate(KlassHandle klass, int size, TRAPS) {
 
 oop CollectedHeap::class_allocate(KlassHandle klass, int size, TRAPS) {
   debug_only(check_for_valid_allocation_state());
+
   assert(!Universe::heap()->is_gc_active(), "Allocation during gc not allowed");
   assert(size >= 0, "int won't convert to size_t");
   HeapWord* obj = common_mem_allocate_init(klass, size, CHECK_NULL);

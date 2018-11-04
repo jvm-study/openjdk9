@@ -137,14 +137,27 @@ IRT_END
 //------------------------------------------------------------------------------------------------------------------------
 // Allocation
 
+//TODO 创建对象
+/**
+ * 创建对象
+ * @param thread
+ * @param pool
+ * @param index
+ */
 IRT_ENTRY(void, InterpreterRuntime::_new(JavaThread* thread, ConstantPool* pool, int index))
+
+
+  //从运行时常量池中获取KlassOop
   Klass* k_oop = pool->klass_at(index, CHECK);
   instanceKlassHandle klass (THREAD, k_oop);
 
   // Make sure we are not instantiating an abstract klass
+  // 确保我们没有实例化一个抽象的klass
   klass->check_valid_for_instantiation(true, CHECK);
 
   // Make sure klass is initialized
+
+  // 保证已经完成类加载和初始化
   klass->initialize(CHECK);
 
   // At this point the class may not be fully initialized
@@ -161,7 +174,11 @@ IRT_ENTRY(void, InterpreterRuntime::_new(JavaThread* thread, ConstantPool* pool,
   //       Java).
   //       If we have a breakpoint, then we don't rewrite
   //       because the _breakpoint bytecode would be lost.
+
+  //分配对象
   oop obj = klass->allocate_instance(CHECK);
+
+
   thread->set_vm_result(obj);
 IRT_END
 

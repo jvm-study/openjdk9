@@ -527,6 +527,8 @@ void GraphKit::builtin_throw(Deoptimization::DeoptReason reason, Node* arg) {
     // continue on with the normal codegen
   }
 
+
+  //判断条件是否满足
   // If this particular condition has not yet happened at this
   // bytecode, then use the uncommon trap mechanism, and allow for
   // a future recompilation if several traps occur here.
@@ -558,6 +560,10 @@ void GraphKit::builtin_throw(Deoptimization::DeoptReason reason, Node* arg) {
   // let us handle the throw inline, with a preconstructed instance.
   // Note:   If the deopt count has blown up, the uncommon trap
   // runtime is going to flush this nmethod, not matter what.
+
+  /**
+   * 这里要满足两个条件：1.检测到频繁抛出异常，2. OmitStackTraceInFastThrow为true，或StackTraceInThrowable为false
+   */
   if (treat_throw_as_hot
       && (!StackTraceInThrowable || OmitStackTraceInFastThrow)) {
     // If the throw is local, we use a pre-existing instance and

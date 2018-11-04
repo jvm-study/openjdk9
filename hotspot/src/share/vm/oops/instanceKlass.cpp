@@ -1015,15 +1015,28 @@ instanceOop InstanceKlass::register_finalizer(instanceOop i, TRAPS) {
   return h_i();
 }
 
+
+/**
+ * 分配对象
+ * @param __the_thread__
+ * @return
+ */
 instanceOop InstanceKlass::allocate_instance(TRAPS) {
+
+  //是否重写finalize()方法
   bool has_finalizer_flag = has_finalizer(); // Query before possible GC
+
+  //分配的对象的大小
   int size = size_helper();  // Query before forming handle.
 
   KlassHandle h_k(THREAD, this);
 
   instanceOop i;
 
+  //分配对象
   i = (instanceOop)CollectedHeap::obj_allocate(h_k, size, CHECK_NULL);
+
+
   if (has_finalizer_flag && !RegisterFinalizersAtInit) {
     i = register_finalizer(i, CHECK_NULL);
   }

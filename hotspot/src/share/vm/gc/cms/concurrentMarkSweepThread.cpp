@@ -45,14 +45,23 @@ int  ConcurrentMarkSweepThread::_CMS_flag                   = CMS_nil;
 
 volatile jint ConcurrentMarkSweepThread::_pending_yields    = 0;
 
+/**
+ * 2018-11-01
+ * 创建线程
+ * @param collector
+ */
 ConcurrentMarkSweepThread::ConcurrentMarkSweepThread(CMSCollector* collector)
   : ConcurrentGCThread() {
+
+  //是否设置了+UseConcMarkSweepGC
   assert(UseConcMarkSweepGC,  "UseConcMarkSweepGC should be set");
+  //CMS线程是否已经被创建过
   assert(_cmst == NULL, "CMS thread already created");
   _cmst = this;
   assert(_collector == NULL, "Collector already set");
   _collector = collector;
 
+  //CMS线程名称
   set_name("CMS Main Thread");
 
   // An old comment here said: "Priority should be just less
@@ -66,22 +75,39 @@ ConcurrentMarkSweepThread::ConcurrentMarkSweepThread(CMSCollector* collector)
   // starving if UseCriticalCMSThreadPriority is on.
   // That won't happen on Solaris for various reasons,
   // but may well happen on non-Solaris platforms.
+  // CriticalPriority==11 && NearMaxPriority==9
+
+  //TODO 设置线程优先级?
+  /**
+   * 2018-11-01
+   *
+   * UseCriticalCMSThreadPriority默认为false,如果配置为true,VMThread 可能不会获得CPU
+   *
+   */
   create_and_start(UseCriticalCMSThreadPriority ? CriticalPriority : NearMaxPriority);
 }
 
+
+/**
+ * 2018-11-01
+ */
 void ConcurrentMarkSweepThread::run_service() {
   assert(this == cmst(), "just checking");
 
+  //CMS线程获取CPU
   if (BindCMSThreadToCPU && !os::bind_to_processor(CPUForCMSThread)) {
     log_warning(gc)("Couldn't bind CMS thread to processor " UINTX_FORMAT, CPUForCMSThread);
   }
 
+  //_should_terminate变量只有在stop方法中才会为true，所以只要没有调用stop方法，这个就是while死循环，一直会检测
   while (!should_terminate()) {
     sleepBeforeNextCycle();
+    //该方法内部也是一个while循环，只有在_should_terminate=true或者是需要进行一次GC时才会结束该方法然后往下运行
     if (should_terminate()) break;
     GCIdMark gc_id_mark;
     GCCause::Cause cause = _collector->_full_gc_requested ?
       _collector->_full_gc_cause : GCCause::_cms_concurrent_mark;
+    //background模式
     _collector->collect_in_background(cause);
   }
 
@@ -294,17 +320,27 @@ void ConcurrentMarkSweepThread::wait_on_cms_lock_for_scavenge(long t_millis) {
   }
 }
 
+
+/**
+ *
+ *
+ *
+ */
 void ConcurrentMarkSweepThread::sleepBeforeNextCycle() {
   while (!should_terminate()) {
+    //CMSWaitDuration 默认是2000
     if(CMSWaitDuration >= 0) {
       // Wait until the next synchronous GC, a concurrent full gc
       // request or a timeout, whichever is earlier.
+      //该方法类似于j.u.c里面while循环+超时等待，会阻塞线程CMSWaitDuration毫秒时间
       wait_on_cms_lock_for_scavenge(CMSWaitDuration);
     } else {
       // Wait until any cms_lock event or check interval not to call shouldConcurrentCollect permanently
+      //类似与Java中的wait(2000)，CMSWaitDuration默认2000ms
       wait_on_cms_lock(CMSCheckInterval);
     }
     // Check if we should start a CMS collection cycle
+    // 检查是否要进行CMS GC
     if (_collector->shouldConcurrentCollect()) {
       return;
     }

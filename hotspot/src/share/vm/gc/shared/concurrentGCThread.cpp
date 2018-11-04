@@ -37,6 +37,10 @@ ConcurrentGCThread::ConcurrentGCThread() :
   _should_terminate(false), _has_terminated(false) {
 };
 
+/**
+ * 创建和开始并行线程
+ * @param prio
+ */
 void ConcurrentGCThread::create_and_start(ThreadPriority prio) {
   if (os::create_thread(this, os::cgc_thread)) {
     // XXX: need to set this to low priority

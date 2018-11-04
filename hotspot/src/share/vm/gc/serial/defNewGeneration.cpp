@@ -481,7 +481,10 @@ size_t DefNewGeneration::capacity() const {
        + from()->capacity();  // to() is only used during scavenge
 }
 
-
+/**
+ * eden+from
+ * @return
+ */
 size_t DefNewGeneration::used() const {
   return eden()->used()
        + from()->used();      // to() is only used during scavenge
@@ -879,11 +882,20 @@ void DefNewGeneration::reset_scratch() {
   }
 }
 
+/**
+ *
+ * 判断本次晋升是否失败
+ *
+ * @return
+ */
 bool DefNewGeneration::collection_attempt_is_safe() {
+
+  //to空间是否为空
   if (!to()->is_empty()) {
     log_trace(gc)(":: to is not empty ::");
     return false;
   }
+  //old gen是否为空
   if (_old_gen == NULL) {
     GenCollectedHeap* gch = GenCollectedHeap::heap();
     _old_gen = gch->old_gen();

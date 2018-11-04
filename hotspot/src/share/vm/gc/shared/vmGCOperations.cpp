@@ -157,12 +157,21 @@ void VM_GC_HeapInspection::doit() {
   inspect.heap_inspection(_out);
 }
 
-
+/**
+ *
+ * YGC回收
+ *
+ *
+ */
 void VM_GenCollectForAllocation::doit() {
   SvcGCMarker sgcm(SvcGCMarker::MINOR);
 
   GenCollectedHeap* gch = GenCollectedHeap::heap();
   GCCauseSetter gccs(gch, _gc_cause);
+
+
+  //通知内存堆管理器处理一次内存分配失败
+  //_result=分配的结果,垃圾回收过程
   _result = gch->satisfy_failed_allocation(_word_size, _tlab);
   assert(gch->is_in_reserved_or_null(_result), "result not in heap");
 

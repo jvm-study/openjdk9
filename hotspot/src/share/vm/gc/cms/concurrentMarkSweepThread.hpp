@@ -65,7 +65,14 @@ class ConcurrentMarkSweepThread: public ConcurrentGCThread {
   // debugging
   void verify_ok_to_terminate() const PRODUCT_RETURN;
 
+  /**
+   *
+   */
   void run_service();
+
+  /**
+   *
+   */
   void stop_service();
 
  public:

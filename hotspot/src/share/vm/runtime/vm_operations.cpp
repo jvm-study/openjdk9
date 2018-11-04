@@ -52,7 +52,9 @@ void VM_Operation::set_calling_thread(Thread* thread, ThreadPriority priority) {
   _priority = priority;
 }
 
-
+/**
+ * YGC回收
+ */
 void VM_Operation::evaluate() {
   ResourceMark rm;
   outputStream* debugstream;
@@ -63,6 +65,9 @@ void VM_Operation::evaluate() {
     print_on_error(debugstream);
     debugstream->cr();
   }
+
+  //实际进行操作的方法
+  // vmGCOperations.cpp
   doit();
   if (enabled) {
     debugstream->print("end ");

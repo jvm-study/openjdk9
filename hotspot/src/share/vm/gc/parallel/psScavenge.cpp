@@ -661,6 +661,13 @@ void PSScavenge::clean_up_failed_promotion() {
   NOT_PRODUCT(heap->reset_promotion_should_fail();)
 }
 
+/**
+ *
+ *
+ *
+ *
+ * @return
+ */
 bool PSScavenge::should_attempt_scavenge() {
   ParallelScavengeHeap* heap = ParallelScavengeHeap::heap();
   PSGCAdaptivePolicyCounters* counters = heap->gc_policy_counters();
