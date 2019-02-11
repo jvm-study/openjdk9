@@ -308,6 +308,10 @@ static jint print_flag(AttachOperation* op, outputStream* out) {
 // Table to map operation names to functions.
 
 // names must be of length <= AttachOperation::name_length_max
+/**
+ * Attach的详细方法信息
+ *
+ */
 static AttachOperationFunctionInfo funcs[] = {
   { "agentProperties",  get_agent_properties },
   { "datadump",         data_dump },

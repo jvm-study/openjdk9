@@ -200,6 +200,7 @@ DefNewGeneration::DefNewGeneration(ReservedSpace rs,
   _from_space = new ContiguousSpace();
   _to_space   = new ContiguousSpace();
 
+  //如果_eden_space、_from_space、_to_space其中任何一个为空，说明新生代分配内存失败，则虚拟机退出
   if (_eden_space == NULL || _from_space == NULL || _to_space == NULL) {
     vm_exit_during_initialization("Could not allocate a new gen space");
   }
@@ -598,6 +599,7 @@ void DefNewGeneration::collect(bool   full,
   // If the next generation is too full to accommodate promotion
   // from this generation, pass on collection; let the next generation
   // do it.
+  //判断当前的GC是否安全
   if (!collection_attempt_is_safe()) {
     log_trace(gc)(":: Collection attempt not safe ::");
     gch->set_incremental_collection_failed(); // Slight lie: we did not even attempt one
@@ -611,6 +613,11 @@ void DefNewGeneration::collect(bool   full,
 
   gch->trace_heap_before_gc(&gc_tracer);
 
+
+  /**
+   *
+   * GC 开始
+   */
   // These can be shared for all code paths
   IsAliveClosure is_alive(this);
   ScanWeakRefClosure scan_weak_ref(this);
@@ -757,6 +764,7 @@ void DefNewGeneration::handle_promotion_failure(oop old) {
   _promotion_failed_info.register_copy_failure(old->size());
   _preserved_marks_set.get()->push_if_necessary(old, old->mark());
   // forward to self
+//  最后调用forward_to()设置原对象的对象头为转发指针，表示该对象已被复制，并指明该对象已经被复制到什么位置；
   old->forward_to(old);
 
   _promo_failure_scan_stack.push(old);
@@ -768,7 +776,11 @@ void DefNewGeneration::handle_promotion_failure(oop old) {
     _promo_failure_drain_in_progress = false;
   }
 }
-
+/**
+ * 对象复制
+ * @param old
+ * @return
+ */
 oop DefNewGeneration::copy_to_survivor_space(oop old) {
   assert(is_in_reserved(old) && !old->is_forwarded(),
          "shouldn't be scavenging this oop");
@@ -776,11 +788,13 @@ oop DefNewGeneration::copy_to_survivor_space(oop old) {
   oop obj = NULL;
 
   // Try allocating obj in to-space (unless too old)
+//  如果该对象的age小于_tenuring_threshold（直接晋升到老年代的阈值），则将其分配到to区域，分配成功后，将原对象的数据内容复制到to区域新分配的对象上，并增加该对象的复制计数age和更新ageTable；
   if (old->age() < tenuring_threshold()) {
     obj = (oop) to()->allocate_aligned(s);
   }
 
   // Otherwise try allocating obj tenured
+//  否则通过_next_gen->promote()尝试将该对象晋升，如果晋升失败，则调用handle_promotion_failure()处理失败的对象
   if (obj == NULL) {
     obj = _old_gen->promote(old, s);
     if (obj == NULL) {

@@ -587,6 +587,7 @@ bool InstanceKlass::link_class_impl(
   // verification & rewriting
   {
     oop init_lock = this_k->init_lock();
+    // 加锁
     ObjectLocker ol(init_lock, THREAD, init_lock != NULL);
     // rewritten will have been set if loader constraint error found
     // on an earlier link attempt
@@ -1109,6 +1110,12 @@ Method* InstanceKlass::class_initializer() {
   return NULL;
 }
 
+/**
+ *
+ *
+ * @param this_k
+ * @param __the_thread__
+ */
 void InstanceKlass::call_class_initializer_impl(instanceKlassHandle this_k, TRAPS) {
   if (ReplayCompiles &&
       (ReplaySuppressInitializers == 1 ||

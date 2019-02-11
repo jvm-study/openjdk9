@@ -159,6 +159,15 @@ bool TenuredGeneration::promotion_attempt_is_safe(size_t max_promotion_in_bytes)
   return res;
 }
 
+//TODO 老年代GC
+/**
+ * TODO 老年代GC
+ * 标记-压缩-整理算法
+ * @param full
+ * @param clear_all_soft_refs
+ * @param size
+ * @param is_tlab
+ */
 void TenuredGeneration::collect(bool   full,
                                 bool   clear_all_soft_refs,
                                 size_t size,
@@ -178,6 +187,7 @@ void TenuredGeneration::collect(bool   full,
 
   gch->pre_full_gc_dump(gc_timer);
 
+  //垃圾回收核心算法
   GenMarkSweep::invoke_at_safepoint(ref_processor(), clear_all_soft_refs);
 
   gch->post_full_gc_dump(gc_timer);

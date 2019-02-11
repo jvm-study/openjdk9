@@ -584,10 +584,23 @@ public:
   static const int               _primelist[_prime_array_size];
 
   // Hashtable holding loaded classes.
+    /**
+     *
+     * 持有已加载类的Hashtable
+     */
   static Dictionary*            _dictionary;
+
+  /**
+   *
+   * 持有将被加载类的占位符的Hashtable
+   */
 
   // Hashtable holding placeholders for classes being loaded.
   static PlaceholderTable*       _placeholders;
+  /**
+   *
+   * 持有来自于共享库的类的hashtable
+   */
 
   // Hashtable holding classes from the shared archive.
   static Dictionary*             _shared_dictionary;
@@ -595,17 +608,31 @@ public:
   // Monotonically increasing counter which grows with
   // _number_of_classes as well as hot-swapping and breakpoint setting
   // and removal.
+    /**
+     * 单调递增计数器，随着_numer_of_classes和断点设置等信息增长或者删除
+     */
+
   static int                     _number_of_modifications;
 
+  /**
+   * 系统类加载器锁对象
+   */
   // Lock object for system class loader
   static oop                     _system_loader_lock_obj;
-
+    /**
+      * 类加载器约束
+      */
   // Constraints on class loaders
   static LoaderConstraintTable*  _loader_constraints;
 
+    /**
+    * 解析错误
+    */
   // Resolution errors
   static ResolutionErrorTable*   _resolution_errors;
-
+    /**
+      * 调用方法表
+      */
   // Invoke methods (JSR 292)
   static SymbolPropertyTable*    _invoke_method_table;
 

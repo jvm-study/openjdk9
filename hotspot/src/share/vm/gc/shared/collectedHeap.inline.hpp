@@ -204,6 +204,7 @@ HeapWord* CollectedHeap::common_mem_allocate_noinit(KlassHandle klass, size_t si
 
 HeapWord* CollectedHeap::common_mem_allocate_init(KlassHandle klass, size_t size, TRAPS) {
   HeapWord* obj = common_mem_allocate_noinit(klass, size, CHECK_NULL);
+  //TODO 初始化对象
   init_obj(obj, size);
   return obj;
 }

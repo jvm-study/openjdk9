@@ -68,8 +68,15 @@ void GenMarkSweep::invoke_at_safepoint(ReferenceProcessor* rp, bool clear_all_so
   // hook up weak ref data so it can be used during Mark-Sweep
   assert(ref_processor() == NULL, "no stomping");
   assert(rp != NULL, "should be non-NULL");
+
+  /**
+   * 设置引用处理器
+   */
   set_ref_processor(rp);
+
+  //设置引用处理器策略
   rp->setup_policy(clear_all_softrefs);
+
 
   gch->trace_heap_before_gc(_gc_tracer);
 
@@ -78,6 +85,8 @@ void GenMarkSweep::invoke_at_safepoint(ReferenceProcessor* rp, bool clear_all_so
   CodeCache::gc_prologue();
 
   // Increment the invocation count
+
+  //增加永久代回收的统计次数
   _total_invocations++;
 
   // Capture used regions for each generation that will be
@@ -188,6 +197,11 @@ void GenMarkSweep::mark_sweep_phase1(bool clear_all_softrefs) {
   // use OopsInGenClosure constructor which takes a generation,
   // as the Universe has not been created when the static constructors
   // are run.
+
+   /**
+    *
+    *
+    */
   follow_root_closure.set_orig_generation(gch->old_gen());
 
   // Need new claim bits before marking starts.

@@ -128,12 +128,21 @@ void GCLocker::jni_lock(JavaThread* thread) {
  * openjdk的bug
  * https://bugs.openjdk.java.net/browse/JDK-8048556
  * @param thread
+ * 
+ * 
+ * 因为线程是并发执行的，所以存在以下两种情况：
+     1、如果线程T1还没执行到图中的A位置，那么这个时候OP2触发的YGC会被丢弃，这种情况是没有问题的.
+     2、如果线程T1执行在A到B的位置，这时_jni_lock_count已经减为0，则GC_Locker::is_active()为false，
+   OP2触发的YGC会被正常的执行，并且会阻塞住OP1触发的YGC，等之前的YGC结束之后，OP1的YGC继续执行，在这种情况，显然是多余的一次。
  */
 void GCLocker::jni_unlock(JavaThread* thread) {
   assert(thread->in_last_critical(), "should be exiting critical region");
   MutexLocker mu(JNICritical_lock);
+  //次数减1
   _jni_lock_count--;
+
   decrement_debug_jni_lock_count();
+
   thread->exit_critical();
   if (needs_gc() && !is_active_internal()) {
     // We're the last thread out. Cause a GC to occur.

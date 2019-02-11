@@ -205,6 +205,12 @@ VM_Operation*     VMThread::_cur_vm_operation   = NULL;
 VMOperationQueue* VMThread::_vm_queue           = NULL;
 PerfCounter*      VMThread::_perf_accumulated_vm_operation_time = NULL;
 
+/**
+ * 
+ * VMThread负责调度执行虚拟机内部的VM线程操作，如GC操作等，
+ * 
+ * 
+ * */
 
 void VMThread::create() {
   assert(vm_thread() == NULL, "we can only allocate one VMThread");

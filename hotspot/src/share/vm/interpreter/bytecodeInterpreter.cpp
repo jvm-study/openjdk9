@@ -2196,13 +2196,16 @@ run:
               }
             }
 #endif
+             //TODO 快速分配
+            //初始化对象
             if (result != NULL) {
               // Initialize object (if nonzero size and need) and then the header
               if (need_zero ) {
                 HeapWord* to_zero = (HeapWord*) result + sizeof(oopDesc) / oopSize;
                 obj_size -= sizeof(oopDesc) / oopSize;
                 if (obj_size > 0 ) {
-                  memset(to_zero, 0, obj_size * HeapWordSize);
+                    //实例空间数据填零
+                    memset(to_zero, 0, obj_size * HeapWordSize);
                 }
               }
               if (UseBiasedLocking) {

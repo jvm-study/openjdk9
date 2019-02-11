@@ -88,6 +88,10 @@ class CollectorPolicy : public CHeapObj<mtGC> {
 
   CollectorPolicy();
 
+  /**
+   * 堆初始化
+   *
+   */
  public:
   virtual void initialize_all() {
     initialize_alignments();

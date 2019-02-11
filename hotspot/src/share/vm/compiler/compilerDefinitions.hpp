@@ -45,16 +45,19 @@ enum MethodCompilation {
   InvocationEntryBci = -1     // i.e., not a on-stack replacement compilation
 };
 
+/**
+ * 编译等级
+ */
 // Enumeration to distinguish tiers of compilation
 enum CompLevel {
   CompLevel_any               = -2,
   CompLevel_all               = -2,
   CompLevel_aot               = -1,
-  CompLevel_none              = 0,         // Interpreter
-  CompLevel_simple            = 1,         // C1
-  CompLevel_limited_profile   = 2,         // C1, invocation & backedge counters
-  CompLevel_full_profile      = 3,         // C1, invocation & backedge counters + mdo
-  CompLevel_full_optimization = 4          // C2, Shark or JVMCI
+  CompLevel_none              = 0,         // Interpreter 解释器解释执行，不采用性能监控数据，可以升级到第1级
+  CompLevel_simple            = 1,         // C1 会把热点代码迅速的编译成本地代码，如果需要可以采集性能数据
+  CompLevel_limited_profile   = 2,         // C1, invocation & backedge counters  进行更多耗时的优化，甚至可能根据第1级采集的性能数据采取激进的优化措施
+  CompLevel_full_profile      = 3,         // C1, invocation & backedge counters + mdo 采集性能数据进行优化措施
+  CompLevel_full_optimization = 4          // C2, Shark or JVMCI //采用C2编译器，进行完全的优化
 };
 
 extern CompLevel CompLevel_highest_tier;

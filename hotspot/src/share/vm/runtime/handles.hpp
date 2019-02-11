@@ -67,6 +67,7 @@ class Klass;
 
 class Handle VALUE_OBJ_CLASS_SPEC {
  private:
+    //指向OOP的首地址
   oop* _handle;
 
  protected:

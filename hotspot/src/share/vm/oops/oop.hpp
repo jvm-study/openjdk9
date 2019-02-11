@@ -76,6 +76,9 @@ class oopDesc {
     narrowKlass _compressed_klass;
   } _metadata;
 
+  /**
+   * 内存屏障
+   */
   // Fast access to barrier set. Must be initialized.
   static BarrierSet* _bs;
 

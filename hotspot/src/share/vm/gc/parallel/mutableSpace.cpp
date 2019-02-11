@@ -175,6 +175,7 @@ HeapWord* MutableSpace::allocate(size_t size) {
          "not locked");
   HeapWord* obj = top();
   if (pointer_delta(end(), obj) >= size) {
+    //将permSpace内存区域的top指针往高地址移动了size大小的字节数
     HeapWord* new_top = obj + size;
     set_top(new_top);
     assert(is_object_aligned((intptr_t)obj) && is_object_aligned((intptr_t)new_top),

@@ -3668,13 +3668,18 @@ jint Threads::create_vm(JavaVMInitArgs* args, bool* canTryAgain) {
   // real raw monitor. VM is setup enough here for raw monitor enter.
   JvmtiExport::transition_pending_onload_raw_monitors();
 
-  /** 创建VMThread */
+  //TODO 创建VMThread
+  /**
+   * 创建VMThread
+   * */
   // Create the VMThread
   { TraceTime timer("Start VMThread", TRACETIME_LOG(Info, startuptime));
 
+  //创建Thread对象
   VMThread::create();
     Thread* vmthread = VMThread::vm_thread();
 
+    //调用操作系统api创建线程
     if (!os::create_thread(vmthread, os::vm_thread)) {
       vm_exit_during_initialization("Cannot create VM thread. "
                                     "Out of system resources.");
@@ -3684,6 +3689,7 @@ jint Threads::create_vm(JavaVMInitArgs* args, bool* canTryAgain) {
     // Monitors can have spurious returns, must always check another state flag
     {
       MutexLocker ml(Notify_lock);
+      //启动线程
       os::start_thread(vmthread);
       while (vmthread->active_handles() == NULL) {
         Notify_lock->wait();
@@ -3742,6 +3748,10 @@ jint Threads::create_vm(JavaVMInitArgs* args, bool* canTryAgain) {
 #endif // INCLUDE_MANAGEMENT
 
   // Signal Dispatcher needs to be started before VMInit event is posted
+
+  /**
+   * Signal Dispatcher线程创建
+   */
   os::signal_init();
 
   // Start Attach Listener if +StartAttachListener or it can't be started lazily

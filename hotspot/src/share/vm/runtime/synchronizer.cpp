@@ -712,6 +712,8 @@ static inline intptr_t get_next_hash(Thread * Self, oop obj) {
 }
 
 intptr_t ObjectSynchronizer::FastHashCode(Thread * Self, oop obj) {
+
+   //如果使用偏向锁
   if (UseBiasedLocking) {
     // NOTE: many places throughout the JVM do not expect a safepoint
     // to be taken here, in particular most operations on perm gen
@@ -765,6 +767,7 @@ intptr_t ObjectSynchronizer::FastHashCode(Thread * Self, oop obj) {
     // If atomic operation failed, we must inflate the header
     // into heavy weight monitor. We could add more code here
     // for fast path, but it does not worth the complexity.
+    //是否重量级锁
   } else if (mark->has_monitor()) {
     monitor = mark->monitor();
     temp = monitor->header();

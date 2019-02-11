@@ -48,12 +48,12 @@ class GCCause : public AllStatic {
     _jvmti_force_gc,
     _gc_locker,
     _heap_inspection,
-    _heap_dump,
+    _heap_dump,//执行堆存储
     _wb_young_gc,
     _wb_conc_mark,
     _wb_full_gc,
     _update_allocation_context_stats_inc,
-    _update_allocation_context_stats_full,
+    _update_allocation_context_stats_full,rr
 
     /* implementation independent, but reserved for GC use */
     _no_gc,

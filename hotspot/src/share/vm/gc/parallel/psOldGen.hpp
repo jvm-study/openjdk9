@@ -80,6 +80,7 @@ class PSOldGen : public CHeapObj<mtGC> {
   HeapWord* allocate_noexpand(size_t word_size) {
     // We assume the heap lock is held here.
     assert_locked_or_safepoint(Heap_lock);
+    //TODO在堆区分配内存空间
     HeapWord* res = object_space()->allocate(word_size);
     if (res != NULL) {
       DEBUG_ONLY(assert_block_in_covered_region(MemRegion(res, word_size)));

@@ -188,6 +188,8 @@ size_t ReferenceProcessor::total_count(DiscoveredList lists[]) {
 }
 
 ReferenceProcessorStats ReferenceProcessor::process_discovered_references(
+
+
   BoolObjectClosure*           is_alive,
   OopClosure*                  keep_alive,
   VoidClosure*                 complete_gc,

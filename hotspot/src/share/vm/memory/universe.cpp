@@ -669,6 +669,10 @@ jint universe_init() {
 
   JavaClasses::compute_hard_coded_offsets();
 
+  //TODO 堆的初始化
+  /**
+   * 堆的初始化
+   */
   jint status = Universe::initialize_heap();
   if (status != JNI_OK) {
     return status;
@@ -718,6 +722,10 @@ jint universe_init() {
   return JNI_OK;
 }
 
+/**
+ * 创建堆
+ * @return
+ */
 CollectedHeap* Universe::create_heap() {
   assert(_collectedHeap == NULL, "Heap already created");
 #if !INCLUDE_ALL_GCS
@@ -728,12 +736,18 @@ CollectedHeap* Universe::create_heap() {
   } else if (UseConcMarkSweepGC) {
     fatal("UseConcMarkSweepGC not supported in this VM.");
 #else
+
   if (UseParallelGC) {
-    return Universe::create_heap_with_policy<ParallelScavengeHeap, GenerationSizer>();
+
+       return Universe::create_heap_with_policy<ParallelScavengeHeap, GenerationSizer>();
+
   } else if (UseG1GC) {
-    return Universe::create_heap_with_policy<G1CollectedHeap, G1CollectorPolicy>();
+
+       return Universe::create_heap_with_policy<G1CollectedHeap, G1CollectorPolicy>();
+
   } else if (UseConcMarkSweepGC) {
-    return Universe::create_heap_with_policy<GenCollectedHeap, ConcurrentMarkSweepPolicy>();
+
+       return Universe::create_heap_with_policy<GenCollectedHeap, ConcurrentMarkSweepPolicy>();
 #endif
   } else if (UseSerialGC) {
     return Universe::create_heap_with_policy<GenCollectedHeap, MarkSweepPolicy>();
@@ -756,6 +770,10 @@ jint Universe::initialize_heap() {
 
   _collectedHeap = create_heap_ext();
   if (_collectedHeap == NULL) {
+
+     /**
+      * 创建堆
+      */
     _collectedHeap = create_heap();
   }
 

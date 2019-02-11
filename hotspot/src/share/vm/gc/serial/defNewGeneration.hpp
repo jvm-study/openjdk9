@@ -38,7 +38,12 @@ class ScanClosure;
 class STWGCTimer;
 class CSpaceCounters;
 class ScanWeakRefClosure;
-
+/**
+ *
+ * 新生代
+ *
+ *
+ */
 // DefNewGeneration is a young generation containing eden, from- and
 // to-space.
 
@@ -47,6 +52,7 @@ class DefNewGeneration: public Generation {
 
 protected:
   Generation* _old_gen;
+  //晋升阀值
   uint        _tenuring_threshold;   // Tenuring threshold for next collection.
   AgeTable    _age_table;
   // Size of object to pretenure in words; command line provides bytes

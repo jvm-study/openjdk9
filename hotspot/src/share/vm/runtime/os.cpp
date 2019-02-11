@@ -245,7 +245,11 @@ OSReturn os::get_priority(const Thread* const thread, ThreadPriority& priority) 
 
 // sigexitnum_pd is a platform-specific special signal used for terminating the Signal thread.
 
-
+/**
+ *
+ * @param thread
+ * @param __the_thread__
+ */
 static void signal_thread_entry(JavaThread* thread, TRAPS) {
   os::set_priority(thread, NearMaxPriority);
   while (true) {
@@ -254,6 +258,7 @@ static void signal_thread_entry(JavaThread* thread, TRAPS) {
       // FIXME : Currently we have not decided what should be the status
       //         for this java thread blocked here. Once we decide about
       //         that we should fix this.
+      //等待获取信号
       sig = os::signal_wait();
     }
     if (sig == os::sigexitnum_pd()) {
@@ -347,7 +352,9 @@ void os::init_before_ergo() {
   // platform that are used during ergonomic decisions.
   VM_Version::init_before_ergo();
 }
-
+/**
+ * Signal Dispatcher线程创建
+ */
 void os::signal_init() {
   if (!ReduceSignalUsage) {
     // Setup JavaThread for processing signals

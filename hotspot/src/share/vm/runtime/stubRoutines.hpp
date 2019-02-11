@@ -252,6 +252,13 @@ class StubRoutines: AllStatic {
 
   static address catch_exception_entry()                   { return _catch_exception_entry; }
 
+
+  /**
+   *
+   * 调用java
+   *
+   *
+   */
   // Calls to Java
   typedef void (*CallStub)(
     address   link,
@@ -264,6 +271,11 @@ class StubRoutines: AllStatic {
     TRAPS
   );
 
+
+  /**
+   * 函数指针
+   * @return
+   */
   static CallStub call_stub()                              { return CAST_TO_FN_PTR(CallStub, _call_stub_entry); }
 
   // Exceptions

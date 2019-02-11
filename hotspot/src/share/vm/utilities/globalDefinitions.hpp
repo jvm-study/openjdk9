@@ -901,7 +901,7 @@ TosState as_TosState(BasicType type);
 //
 // Given a state, the xxxx_trans state can always be found by adding 1.
 //
-enum JavaThreadState {
+enum JavaThreadState {CompLevel
   _thread_uninitialized     =  0, // should never happen (missing initialization)
   _thread_new               =  2, // just starting up, i.e., in process of being initialized
   _thread_new_trans         =  3, // corresponding transition state (not used, included for completness)

@@ -113,6 +113,11 @@ class Universe: AllStatic {
   friend bool  universe_post_init();
   friend void  universe_post_module_init();
 
+
+  /**
+   * Universe定义的成员变量
+   *
+   */
  private:
   // Known classes in the VM
   static Klass* _boolArrayKlassObj;
